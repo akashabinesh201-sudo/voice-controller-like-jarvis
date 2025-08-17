@@ -1,0 +1,24 @@
+    if "time" in command:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        speak(f"The current time is {time}")
+
+    elif "search" in command:
+        topic = command.replace("search", "")
+        info = wikipedia.summary(topic, sentences=2)
+        speak(info)
+
+    elif "play" in command:
+        song = command.replace("play", "")
+        speak(f"Playing {song}")
+        pywhatkit.playonyt(song)
+
+    elif "open google" in command:
+        webbrowser.open("https://www.google.com")
+        speak("Opening Google")
+
+    elif "stop" in command or "exit" in command:
+        speak("Goodbye!")
+        break
+
+    else:
+        speak("I can’t do that yet, but I’m learning fast!")
