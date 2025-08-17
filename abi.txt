@@ -1,0 +1,144 @@
+name: grocery_app
+description: A simple grocery delivery app
+publish_to: 'none'
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.0
+
+flutter:
+  uses-material-design: true
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CartModel(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'My Grocery Shop',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+
+class Product {
+  final String name;
+  final double price;
+
+  Product({required this.name, required this.price});
+}
+
+class CartModel extends ChangeNotifier {
+  final List<Product> _items = [];
+
+  List<Product> get items => _items;
+
+  double get totalPrice =>
+      _items.fold(0, (total, current) => total + current.price);
+
+  void add(Product product) {
+    _items.add(product);
+    notifyListeners();
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  final List<Product> products = const [
+    Product(name: 'Tomato', price: 30),
+    Product(name: 'Potato', price: 20),
+    Product(name: 'Milk', price: 50),
+    Product(name: 'Bread', price: 40),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = Provider.of<CartModel>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Grocery Shop'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CartPage()),
+              );
+            },
+          )
+        ],
+      ),
+      body: ListView(
+        children: products
+            .map(
+              (product) => ListTile(
+                title: Text(product.name),
+                subtitle: Text('₹${product.price.toStringAsFixed(2)}'),
+                trailing: ElevatedButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    cart.add(product);
+                  },
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
+class CartPage extends StatelessWidget {
+  const CartPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = Provider.of<CartModel>(context);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Your Cart')),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: cart.items
+                  .map((product) => ListTile(
+                        title: Text(product.name),
+                        trailing: Text('₹${product.price.toStringAsFixed(2)}'),
+                      ))
+                  .toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Total: ₹${cart.totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 20)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+      
